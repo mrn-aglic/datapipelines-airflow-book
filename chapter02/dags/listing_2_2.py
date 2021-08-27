@@ -13,7 +13,6 @@ UPCOMING_LAUNCH_URL = "https://ll.thespacedevs.com/2.0.0/launch/upcoming/"
 dag = DAG(
     dag_id="download_rocket_launches",
     start_date=airflow.utils.dates.days_ago(14),
-    # schedule_interval=None,
     schedule_interval="@daily",
 )
 

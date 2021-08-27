@@ -21,10 +21,14 @@ services:
       - POSTGRES_PASSWORD=airflow
       - POSTGRES_DB=airflow
     ports:
-      - 5432:5432
+      - "5432:5432"
 
   init:
-    image: *airflow_image
+    build:
+      context: local-api/airflow-data
+      args:
+        AIRFLOW_BASE_IMAGE: *airflow_image
+    image: ch03/airflow-init
     depends_on:
       - postgres
     environment: *airflow_environment
@@ -32,23 +36,32 @@ services:
     command: -c 'airflow db init && airflow users create --username user --password password --firstname Marin --lastname Marin --role Admin --email admin@example.org'
 
   webserver:
-    image: *airflow_image
+    build:
+      context: local-api/airflow-data
+      args:
+        AIRFLOW_BASE_IMAGE: *airflow_image
+    image: ch03/airflow-webserver
     restart: always
     depends_on:
       - postgres
     ports:
-      - 8080:8080
+      - "8080:8080"
     volumes:
       - logs:/opt/airflow/logs
     environment: *airflow_environment
     command: webserver
 
   scheduler:
-    image: *airflow_image
+    build:
+      context: local-api/airflow-data
+      args:
+        AIRFLOW_BASE_IMAGE: *airflow_image
+    image: ch03/airflow-scheduler
     restart: always
     depends_on:
       - postgres
     volumes:
+      - data:/data
       - logs:/opt/airflow/logs
       - ./dags:/opt/airflow/dags
     environment: *airflow_environment
@@ -58,7 +71,8 @@ services:
     build: ./local-api/events-api
     image: airflow/events-api
     ports:
-      - 5000:5000
+      - "5000:5000"
 
 volumes:
   logs:
+  data:

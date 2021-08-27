@@ -13,8 +13,39 @@ repos:
   - repo: https://github.com/psf/black
     rev: 21.5b1
     hooks:
-    -   id: black
-  - repo: https://github.com/pycqa/flake8
-    rev: '3.9.2'
+    - id: black
+#  - repo: https://github.com/pycqa/flake8
+#    rev: '3.9.2'
+#    hooks:
+#    - id: flake8
+  - repo: https://github.com/asottile/seed-isort-config
+    rev: v2.2.0
     hooks:
-    - id: flake8
+    - id: seed-isort-config
+  - repo: https://github.com/timothycrosley/isort
+    rev: 5.6.4
+    hooks:
+      - id: isort
+        # extra dependencies for config in pyproject.toml
+        additional_dependencies: [ "toml" ]
+  - repo: https://github.com/ambv/black
+    rev: 20.8b1
+    hooks:
+      - id: black
+  - repo: https://github.com/pre-commit/mirrors-pylint
+    rev: v2.6.0
+    hooks:
+      - id: pylint
+        exclude: ^(docs/).*$
+        # language_version: python3.6
+        # disabled import-error as may be run out of environment with deps
+        args: ["--disable=import-error,no-name-in-module"]
+  - repo: https://github.com/PyCQA/pydocstyle
+    rev: 5.1.1
+    hooks:
+      - id: pydocstyle
+
+  - repo: https://github.com/codingjoe/relint
+    rev: 1.2.1
+    hooks:
+      - id: relint
