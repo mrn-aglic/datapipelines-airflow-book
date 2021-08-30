@@ -1,0 +1,7 @@
+[tool.isort]
+# config compatible with Black
+line_length = 88
+multi_line_output = 3
+default_section = "THIRDPARTY"
+include_trailing_comma = true
+known_third_party = ["aiohttp", "asyncio_throttle", "boto3", "celery", "datadog", "google", "kombu", "redis", "regex", "sentry_sdk", "setuptools", "structlog", "structlog_pretty", "uvloop"]
