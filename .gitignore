@@ -1,3 +1,4 @@
 .idea/
 */dags/__pycache__
 .DS_Store
+chapter07/.env
