@@ -17,7 +17,6 @@ def _create_file(ds, **context):
     s3_hook.load_string(
         string_data=ds,
         key=f"/data/{ds}.json",
-        # key=f"strings{datetime.datetime.now()}",
         bucket_name="data",
     )
     print("String loaded")
