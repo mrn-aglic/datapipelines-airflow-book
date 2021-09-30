@@ -99,8 +99,19 @@ I have premade a `.env_backup` file. Rename this file
 to `.env`.
 
 First define the `aws_conn` connection id. To do this,
-you need to create an IAM service account. Go to your
-aws console
+you need to create an access key. You can create
+a key for the root user or a new one.
+To add an access key to your root user, login to aws
+console with the root user credentials and open the
+dropdown for your account and click on the `My security
+credentials` option.
+
+If you are creating a new user, choose `Access key - Programmatic
+access` which will automatically generate an access key
+In the `.env` file, set the variable:
+```
+AIRFLOW_CONN_AWS_CONN=aws://<access_key_id>:<secret_access_key>
+```
 
 The sagemaker operator `SageMakerTrainingOperator`
 requires you to define a default aws region,
