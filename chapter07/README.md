@@ -10,6 +10,9 @@ I'm going to try and explain what I did and why I did it.
 ## pre-requirements
 If you want to run sagemaker operators you're going to
 need an aws account. You can get a free tier account.
+Also, make sure you have a bucket that you want to use
+and that you set the correct name of the bucket
+in the variable `my_bucket` in the DAGs.
 
 ## Starting up
 You probably have docker installed already, and I assume
