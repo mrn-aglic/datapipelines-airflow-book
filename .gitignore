@@ -1,5 +1,5 @@
 .idea/
 */dags/__pycache__
 .DS_Store
-chapter07/.env
-chapter07/images/mnist.pkl.gz
+chapter07/digit_classifier/.env
+chapter07/digit_classifier/images/mnist.pkl.gz

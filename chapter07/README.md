@@ -1,4 +1,4 @@
-#Chapter 07 guide
+# Chapter 07 guide
 
 Chapter 07 of the book Datapipelines with apache airflow
 by manning is somewhat more difficult than the other
@@ -7,9 +7,12 @@ some external services.
 
 I'm going to try and explain what I did and why I did it.
 
-This readme is only for the digit classifier example
-that uses aws and sagemaker. For the other example,
-check out chapter07_airbnb.
+The entire folder is basically split into two parts:
+1. digit_classifier - which has some examples before
+the book starts with the larger digit classifier
+example, including that example (in short until
+chapter 7.2).
+2. inside_airbnb - which starts from chapter 7.2.
 
 ## pre-requirements
 If you want to run sagemaker operators you're going to
