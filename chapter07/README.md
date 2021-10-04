@@ -7,6 +7,10 @@ some external services.
 
 I'm going to try and explain what I did and why I did it.
 
+This readme is only for the digit classifier example
+that uses aws and sagemaker. For the other example,
+check out chapter07_airbnb.
+
 ## pre-requirements
 If you want to run sagemaker operators you're going to
 need an aws account. You can get a free tier account.
@@ -130,6 +134,9 @@ as the one from which you pull the image for the
 sagemaker operator!!**
 You can find a list of these images [here](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-algo-docker-registry-paths.html).
 
+If you want to run the chalice example, you'll also
+need the `.env.chalice` environment file you can get
+by renaming and modyfing `.env_backup.chalice`
 
 ## Using sagemaker
 Ok, so, to use sagemaker operators, you need to create a
@@ -138,12 +145,25 @@ Role arn for sagemaker.
 
 Go to aws console and first create a policy. You can
 find the policy used by me in the `aws_resources` folder.
-This policy basically allows everything (I'm an aws
-beginner).
+This policy basically allows everything for S3 (I'm an aws
+beginner). ~~Do not forget to also assign the
+`AmazonSageMakerFullAccess` policy to the role! Otherwise
+the sagemaker deployment task won't work.~~ (doesn't
+seem to be necessery)
 
 Afterwards, create a role and attach the policy to it.
 Paste the Role ARN variable to the sagemaker config
 constant `SAGEMAKER_CONFIG` under the `"role_arn"` key.
+
+### A note on SageMakerEndpointOperator
+The task using this operator may take up to 5-6 minutes
+so be patient.
+Note that the model names in the config, under the paths
+`Model.ModelName` and `Endpoint.ModelName`
+must match for the **create** operation.
+The operator did not work for me any other way. For the
+**update** operation the `Model.ModelName` must not
+exist in your aws account. I tried it.
 
 ## The _setup_env_dag
 This DAG needs to be run once in order to use

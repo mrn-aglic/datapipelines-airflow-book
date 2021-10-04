@@ -8,7 +8,7 @@ RUN pip install --user --no-cache-dir sagemaker
 USER root
 RUN mkdir /dataset
 
-COPY ../dataset/ /dataset/
+COPY ../../dataset /dataset/
 RUN echo $(ls /dataset)
 
 USER airflow

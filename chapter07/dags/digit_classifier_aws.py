@@ -19,10 +19,14 @@ S3_CONNECTION_ID = "aws_conn"
 
 mnist_filename = "mnist.pkl.gz"
 my_bucket = "marin-airflow-book-data"
-sagemaker_output_path = f"s3://{my_bucket}//mnistclassifier-output"
+sagemaker_output_path = f"s3://{my_bucket}/mnistclassifier-output"
 
 TRAINING_IMAGE = "438346466558.dkr.ecr.eu-west-1.amazonaws.com/kmeans:latest"
 ROLE_ARN = "arn:aws:iam::221767510175:role/airflow-book-sagemaker"  # needs to be configured on aws
+
+SAGEMAKER_DEPLOY_OPERATION = (
+    "update"  # create or update - for first time models, needs to be create
+)
 
 SAGEMAKER_CONFIG = {
     "algorithm_specification": {
@@ -78,6 +82,7 @@ sagemaker_train_model = SageMakerTrainingOperator(
 
 SAGEMAKER_DEPLOY_CONFIG = {
     "Model": {
+        # "ModelName": "mnistclassifier",
         "ModelName": "mnistclassifier-{{ execution_date.strftime('%Y-%m-%d-%H-%M-%S') }}",
         "PrimaryContainer": {
             "Image": TRAINING_IMAGE,
@@ -85,7 +90,7 @@ SAGEMAKER_DEPLOY_CONFIG = {
                 f"{sagemaker_output_path}/"
                 "mnistclassifier-{{ execution_date.strftime('%Y-%m-%d-%H-%M-%S') }}/"
                 "output/model.tar.gz"
-            ),
+            ),  # this will link the model and the training job
         },
         "ExecutionRoleArn": ROLE_ARN,
     },
@@ -94,8 +99,9 @@ SAGEMAKER_DEPLOY_CONFIG = {
         "ProductionVariants": [
             {
                 "InitialInstanceCount": 1,
-                "InstanceType": "m1.t2.medium",
+                "InstanceType": "ml.t2.medium",
                 "ModelName": "mnistclassifier",
+                # "ModelName": "mnistclassifier-{{ execution_date.strftime('%Y-%m-%d-%H-%M-%S') }}",  #
                 "VariantName": "AllTraffic",
             }
         ],
@@ -110,6 +116,8 @@ sagemaker_deploy_model = SageMakerEndpointOperator(
     task_id="sagemaker_deploy_model",
     wait_for_completion=True,
     config=SAGEMAKER_DEPLOY_CONFIG,
+    operation=SAGEMAKER_DEPLOY_OPERATION,
+    aws_conn_id=S3_CONNECTION_ID,
     dag=dag,
 )
 
