@@ -1,3 +1,5 @@
 .idea/
 */dags/__pycache__
 .DS_Store
+chapter07/.env
+chapter07/images/mnist.pkl.gz

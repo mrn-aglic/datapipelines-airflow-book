@@ -32,7 +32,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - ./scripts/create_table.sql:/docker-entrypoint-initdb.d/create_table.sql
+      - ./scripts/create_table.sql:/airflow-docker-entrypoint-initdb.d/create_table.sql
 
   init:
 #    image: *airflow_image

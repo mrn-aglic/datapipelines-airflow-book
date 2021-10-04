@@ -26,6 +26,7 @@ repos:
     rev: 5.6.4
     hooks:
       - id: isort
+        args: ["--profile", "black"]
         # extra dependencies for config in pyproject.toml
         additional_dependencies: [ "toml" ]
   - repo: https://github.com/ambv/black
