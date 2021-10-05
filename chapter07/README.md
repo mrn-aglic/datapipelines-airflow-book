@@ -14,6 +14,8 @@ example, including that example (in short until
 chapter 7.2).
 2. inside_airbnb - which starts from chapter 7.2.
 
+# Digit classifier example
+
 ## pre-requirements
 If you want to run sagemaker operators you're going to
 need an aws account. You can get a free tier account.
@@ -173,19 +175,22 @@ This DAG needs to be run once in order to use
 minio local s3 for some of the other DAGs. You can run
 it multiple times without worry of errors (tested it).
 
-The DAG does two things:
+The DAG does two (number two is disabled) things:
 1. copies the mnist.pkl.gz file from local file system
 to the minio instance s3 bucket. Note that this
 functionality can be removed once minio client starts
 working properly. Read _LocalS3_init_ service section.
-2. For some odd reason, the `aws_conn` connection id
-cannot be used if only defined as an environment
-variable. The conn id needs to be visible from airflow
-UI, which is why the second functionality tests whether
-aws_conn is present in the `settings.Session` of airflow,
-and if not, adds it.
+2. Adds `aws_conn` connection id to the airflow
+UI if it is not present there. **This doesn't seem to be
+necessery at all**. However, I needed it when I first
+added the connection string to the `.env` file.
+Probably because part of the connection string was
+URL encoded. <br/> **_I'm really not sure why it worked
+when added to UI and with only part of the
+connection string URL encoded_**. <br/> **In summary, you
+most likely won't need to run this part of the DAG.**
 
-## DAGs in this chapter
+## DAGs in this part (folder)
 1. _setup_env_dag - use this DAG to setup some pre
 requirements for using minio local s3.
 2. 01_s3_copy_object - this DAG creates in the minio s3
@@ -194,3 +199,8 @@ bucket.
 which unfortunately doesn't have access to sagemaker
 4. digit_classifier_aws - the same as 3, but uses
 aws connection to use sagemaker.
+
+# Insider airbnb example
+
+## DAGs in this part (after following 7.2)
+1. _setup_env_dag -
