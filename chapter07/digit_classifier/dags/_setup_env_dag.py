@@ -1,9 +1,7 @@
 from pathlib import Path
 
-from airflow import DAG, settings
-from airflow.models import Connection
-from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator, ShortCircuitOperator
+from airflow import DAG
+from airflow.operators.python import PythonOperator
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.providers.amazon.aws.operators.s3_delete_objects import (
     S3DeleteObjectsOperator,
@@ -17,15 +15,15 @@ dag = DAG(
 )
 
 
-def _check_aws_conn_exists():
-    connections = settings.Session.query(Connection)
-    connection_ids = [conn.conn_id for conn in connections]
-    conn_exists = "aws_conn" in connection_ids
-
-    if conn_exists:
-        print("connection already exists, skipping upstream task")
-
-    return not conn_exists
+# def _check_aws_conn_exists():
+#     connections = settings.Session.query(Connection)
+#     connection_ids = [conn.conn_id for conn in connections]
+#     conn_exists = "aws_conn" in connection_ids
+#
+#     if conn_exists:
+#         print("connection already exists, skipping upstream task")
+#
+#     return not conn_exists
 
 
 def _upload_resource():
@@ -67,20 +65,21 @@ delete_resource = S3DeleteObjectsOperator(
     dag=dag,
 )
 
-short_circuit_aws_conn = ShortCircuitOperator(
-    task_id="conditional_continue_aws_conn",
-    python_callable=_check_aws_conn_exists,
-    dag=dag,
-)
 
-# Add the aws_conn to the UI. For some reason, the aws_conn doesn't work if
-# it is not added through the UI
-add_aws_conn = BashOperator(
-    task_id="add_aws_conn",
-    bash_command="airflow connections add aws_conn --conn-uri $AIRFLOW_CONN_AWS_CONN",
-    dag=dag,
-)
-
-short_circuit_aws_conn >> add_aws_conn
+# short_circuit_aws_conn = ShortCircuitOperator(
+#     task_id="conditional_continue_aws_conn",
+#     python_callable=_check_aws_conn_exists,
+#     dag=dag,
+# )
+#
+# # Add the aws_conn to the UI. For some reason, the aws_conn doesn't work if
+# # it is not added through the UI
+# add_aws_conn = BashOperator(
+#     task_id="add_aws_conn",
+#     bash_command="airflow connections add aws_conn --conn-uri $AIRFLOW_CONN_AWS_CONN",
+#     dag=dag,
+# )
+#
+# short_circuit_aws_conn >> add_aws_conn
 
 delete_resource >> upload_resource

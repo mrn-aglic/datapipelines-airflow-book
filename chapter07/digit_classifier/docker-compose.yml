@@ -54,7 +54,7 @@ services:
 
   scheduler:
     build:
-      context: ./ # will be .airflow-docker when cp starts working
+      context: . # will be .airflow-docker when cp starts working
       dockerfile: local-api/airflow-docker/Dockerfile
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
@@ -76,17 +76,13 @@ services:
     command: scheduler
 
   digit_classifier:
-    build: ./local-api/digit_classifier_api
+    build: local-api/digit_classifier_api
     image: airflow/digit-classifier-api
     env_file:
       - .env.chalice
     ports:
       - "8000:8000"
     command: chalice local --host 0.0.0.0
-#    environment:
-#      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-#      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-#      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
 
 #   we are using a local version of s3
   locals3:

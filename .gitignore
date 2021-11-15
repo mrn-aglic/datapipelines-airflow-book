@@ -1,5 +1,10 @@
 .idea/
 */dags/__pycache__
 .DS_Store
-chapter07/.env
-chapter07/images/mnist.pkl.gz
+chapter07/digit_classifier/.env
+chapter07/digit_classifier/images/mnist.pkl.gz
+chapter07/inside_airbnb/.env
+chapter07/digit_classifier/.env.chalice
+chapter07/digit_classifier/dags/__pycache__
+chapter07/inside_airbnb/dags/__pycache__
+chapter07/inside_airbnb/dags/operators/__pycache__
