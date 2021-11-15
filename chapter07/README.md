@@ -1,6 +1,7 @@
 # Chapter 07 guide
 
-Chapter 07 of the book Datapipelines with apache airflow
+Chapter 07 of the book
+_Data Pipelines with Apache Airflow_
 by manning is somewhat more difficult than the other
 chapters. This is because it requires the reader to use
 some external services.
@@ -218,7 +219,7 @@ aws connection to use sagemaker.
 
 # Insider airbnb example
 
-## DAGs in this part (after following 7.2)
+## DAGs in this part (from chapter 7.2)
 1. test_dag - just to check that the aws connection
 string can work without being added to the UI
 2. inside_airbnb - the example from the book using
