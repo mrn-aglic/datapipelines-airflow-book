@@ -13,6 +13,7 @@ dag = DAG(
     start_date=dates.days_ago(3),
 )
 
+# just test that the connection is working
 copy_mnist_data = S3CopyObjectOperator(
     task_id="copy_mnist_data",
     source_bucket_name="sagemaker-sample-data-eu-west-1",

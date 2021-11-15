@@ -8,10 +8,14 @@ some external services.
 I'm going to try and explain what I did and why I did it.
 
 The entire folder is basically split into two parts:
-1. digit_classifier - which has some examples before
-the book starts with the larger digit classifier
-example, including that example (in short until
-chapter 7.2).
+1. digit_classifier - which has some extra examples and
+including that example the digit classifier example
+(in short until chapter 7.2). Note that I kept minio
+in the docker-compose file and some DAGs that use it.
+What you really need if you follow the book is an `aws
+account`. The `digit classifier` example cannot be
+completed without it. A partial implementation that uses
+minio is provided.
 2. inside_airbnb - which starts from chapter 7.2.
 
 # Digit classifier example
@@ -30,9 +34,21 @@ you know how to use it.
 The docker-compose file contains two services `locals3`
 and `locals3_init` that are required to to run minio, a
 local s3 object storage. Some dags use minio, some don't.
+The dags that use minio are:
+- 01_s3_copy_object_fixed (01_s3_copy_object.py)
+- _setup_env_dag
+- digit_classifier
 
 The commands in these services have been modified compared
 to the book. For starters, newer images are used.
+
+**NOTE that in the book minio is not introduced until
+chapter 7.2. (insider airbnb).**
+
+**YOU DO NOT NEED MINIO FOR THE FIRST PART OF THE
+CHAPTER AND YOU CAN SAFELY DELETE THE SERVICES FROM
+DOCKER-COMPOSE.YML IF YOU DO NOT PLAN TO RUN THE
+DAGs THAT DEPEND ON IT.**
 
 ## Locals3 service
 The locals3 service also has a different command since
@@ -52,7 +68,7 @@ environment:
 ## LocalS3_init service
 
 The entrypoint for `locals3_init` is also modified:
-```
+```dockerfile
 entrypoint: >
       /bin/sh -c "
       while ! /usr/bin/mc config host add locals3 http://locals3:9000 user password; do echo 'MinIO not up and running yet...' && sleep 1; done;
@@ -184,7 +200,7 @@ working properly. Read _LocalS3_init_ service section.
 UI if it is not present there. **This doesn't seem to be
 necessery at all**. However, I needed it when I first
 added the connection string to the `.env` file.
-Probably because part of the connection string was
+Probably because part of the connection string was not
 URL encoded. <br/> **_I'm really not sure why it worked
 when added to UI and with only part of the
 connection string URL encoded_**. <br/> **In summary, you
@@ -203,4 +219,138 @@ aws connection to use sagemaker.
 # Insider airbnb example
 
 ## DAGs in this part (after following 7.2)
-1. _setup_env_dag -
+1. test_dag - just to check that the aws connection
+string can work without being added to the UI
+2. inside_airbnb - the example from the book using
+PythonOperator
+3. inside_airbnb_docker - as number 2, but the
+numbercruncher is inside a docker container.
+
+## DockerOperator prerequisites
+IN order to use the `inside_airbnb_docker` DAG, the
+DockerOperator requires access to the file:
+`/var/run/docker.sock`.
+This repo contains two solutions that work for OS X.
+I'm not sure whether they will work for other operating
+systems.
+
+The "cleaner" solution is to add an additional service
+that crates a relay for bidirectional data transfer.
+Here is the service added to docker-compose:
+```
+socat:
+    image: alpine/socat
+    command: tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - "2375"
+```
+
+Additionally, to use the service the scheduler and
+webserver are linked to it and an additional environment
+variable is added:
+```dockerfile
+webserver:
+    ...
+    environment:
+      <<: *airflow_environment
+      DOCKER_HOST: tcp://socat:2376
+    links:
+      - socat
+    ...
+```
+```dockerfile
+scheduler:
+    ...
+    environment:
+      <<: *airflow_environment
+      DOCKER_HOST: tcp://socat:2376
+    links:
+      - socat
+    ...
+```
+In the DAG itself, we define that the DockerOperator:
+```python
+access_key = os.environ.get("S3_ACCESS_KEY")
+secret_key = os.environ.get("S3_SECRET_KEY")
+
+docker_host = os.environ.get("DOCKER_HOST")
+
+crunch_numbers = DockerOperator(
+    task_id="crunch_numbers",
+    image="airflow_book/numbercruncher",
+    api_version="auto",
+    auto_remove=True,
+    # docker_url="unix://var/run/docker.sock",
+    docker_url=docker_host,
+    network_mode="host",
+    environment={
+        "S3_ENDPOINT": "localhost:9000",
+        "S3_ACCESS_KEY": access_key,
+        "S3_SECRET_KEY": secret_key,
+    },
+    dag=dag,
+)
+```
+
+### Second solution for docker.sock
+The other solution is to mount the docker.sock on the
+scheduler and webserver services and grant
+airflow permission to use the file.
+
+First, we mount the volume for docker.sock in
+docker-compose as given below and setup an additional
+argument that will be passed to the Dockerfile:
+```dockerfile
+webserver:
+    build:
+      context: airflow
+      args:
+        AIRFLOW_BASE_IMAGE: *airflow_image
+        AIRFLOW_CMD: webserver
+    ...
+    volumes:
+      - logs:/opt/airflow/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment: *airflow_environment
+    ...
+    command: webserver
+```
+
+In the Dockerfile for the airflow webserver and
+scheduler services, we need to setup the script
+that will be run once the containers are started
+and export the airflow command as an environment
+variable:
+
+```dockerfile
+ARG AIRFLOW_CMD
+ENV AIRFLOW_CMD=${AIRFLOW_CMD}
+
+COPY entrypoint.sh /entrypoint.sh
+USER root
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+```
+
+Finally, the `entrypoint.sh` script is as follows:
+```shell
+#!/usr/bin/env bash
+chown -R airflow /var/run/docker.sock
+
+printenv AIRFLOW_CMD
+su airflow -c "/usr/bin/dumb-init -- /entrypoint $AIRFLOW_CMD"
+```
+
+# THE END... finally
+It took me about two months of my free time to get
+through the entire chapter and get everything to work.
+After completing the first part of the chapter
+I understood that I wasted my time with minio since
+aws was mandatory for that part. However, minio is still
+required for the second part (insideairbnb).
+
+Oh well... hope this will help someone who is confused
+by the chapter as I was.
