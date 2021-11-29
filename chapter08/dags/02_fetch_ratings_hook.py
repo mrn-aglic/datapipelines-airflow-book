@@ -74,7 +74,7 @@ with DAG(
         python_callable=_rank_movies,
         templates_dict={
             "input_path": "/data/custom_hook/ratings/{{ds}}.json",
-            "output_path": "/data/custom_hook/rankings/{{ds}}.json",
+            "output_path": "/data/custom_hook/rankings/{{ds}}.csv",
         },
     )
 
