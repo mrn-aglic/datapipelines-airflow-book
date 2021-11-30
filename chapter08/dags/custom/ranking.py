@@ -2,6 +2,10 @@ import pandas as pd
 
 
 def rank_movies_by_rating(ratings, min_ratings=2):
+
+    if ratings.empty:
+        return pd.DataFrame(columns=["movieId", "avg_rating", "num_ratings"])
+
     ranking = (
         ratings.groupby("movieId")
         .agg(
