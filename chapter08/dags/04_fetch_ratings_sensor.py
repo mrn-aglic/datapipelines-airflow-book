@@ -29,13 +29,14 @@ def _rank_movies(templates_dict: dict, min_ratings=2, **_):
 
 
 with DAG(
-    dag_id="04_fetch_ratings_sensor", start_date=datetime(2019, 1, 1), max_active_runs=1
+    dag_id="04_fetch_ratings_sensor", start_date=datetime(2019, 1, 1), max_active_runs=3
 ) as dag:
     wait_for_ratings = MovielensRatingsSensor(
         task_id="wait_for_ratings",
         conn_id="movielens",
         start_date="{{ds}}",
         end_date="{{next_ds}}",
+        retries=15,
     )
 
     fetch_ratings = MovielensFetchRatingsOperators(
