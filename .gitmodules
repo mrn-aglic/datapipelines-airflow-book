@@ -1,0 +1,3 @@
+[submodule "chapter08/airflow_book_package"]
+	path = chapter08/airflow_book_package
+	url = https://github.com/mrn-aglic/airflow_book_example_package_repo
