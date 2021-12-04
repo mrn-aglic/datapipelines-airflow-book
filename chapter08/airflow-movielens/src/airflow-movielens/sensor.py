@@ -2,7 +2,7 @@ from typing import Dict
 
 from airflow.sensors.base import BaseSensorOperator
 
-from .movielens_hook import MovielensHook
+from .hook import MovielensHook
 
 
 class MovielensRatingsSensor(BaseSensorOperator):

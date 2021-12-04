@@ -4,7 +4,7 @@ from typing import Any
 
 from airflow.models import BaseOperator
 
-from .movielens_hook import MovielensHook
+from .hook import MovielensHook
 
 
 class MovielensFetchRatingsOperators(BaseOperator):
