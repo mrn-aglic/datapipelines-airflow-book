@@ -20,3 +20,9 @@ Run the docker container:
 docker run --network="host" python_scripts
 ```
 Make sure that the movielens-api is running.
+
+## Airflowbook package
+airflow_book_package is added as a git submodule.
+Refer to the Readme of the git repo for additional
+details:
+https://github.com/mrn-aglic/airflow_book_example_package_repo
