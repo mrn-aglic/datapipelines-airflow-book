@@ -9,3 +9,11 @@ Build and run the image in a single command:
 
 Check out Makefile to see how the commands are
 defined.
+
+Note that for some tests, you'll need to have the code
+from chapter08 up and running. You may also need to
+input the name of the network that the services
+use in the Makefile `run-tests` command.
+
+Here is a list of the tests that won't work without the
+code from chapter08 up and running:
