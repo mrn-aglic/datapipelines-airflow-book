@@ -1,7 +1,7 @@
 from airflow.models import Connection
 from airflow.operators.bash import BashOperator
 from airflowbook.hooks import MovielensHook
-from airflowbook.operators import MovielensPopularityOperator
+from airflowbook.operators.movielens_operators import MovielensPopularityOperator
 from pytest_mock import MockFixture
 
 
