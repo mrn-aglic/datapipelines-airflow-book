@@ -2,7 +2,7 @@ import csv
 import json
 from pathlib import Path
 
-from airflowbook.operators import JsonToCsvOperator
+from airflowbook.json_to_csv_operator import JsonToCsvOperator
 
 
 def test_json_to_csv_operator(tmp_path: Path):
