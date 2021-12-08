@@ -7,6 +7,10 @@ Running the image: `make run-tests`. <br>
 Build and run the image in a single command:
 `make start-tests`.
 
+If you need to reinstall the airflowbook package use
+`make build-tests-nc` (nc: no cache) which builds the
+image without using docker cache.
+
 Check out Makefile to see how the commands are
 defined.
 
