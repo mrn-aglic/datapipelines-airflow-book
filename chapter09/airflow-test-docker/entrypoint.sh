@@ -15,7 +15,9 @@ ls -al dags/
 echo "Listings tests:"
 ls -al tests/
 
-pytest tests/
+ls -al tests/airflowbook/operators
+
+pytest -s tests/
 
 echo "Pytest exit code $?"
 

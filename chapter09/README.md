@@ -22,4 +22,4 @@ use in the Makefile `run-tests` command.
 Here is a list of the tests that won't work without the
 code from chapter08 up and running:
 - test_movielens_operators (tests/dags/chapter08/airflow_movielens)
--
+- test_movielens_operators_with_dag (tests/airflowbook/operators)
