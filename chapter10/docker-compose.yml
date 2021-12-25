@@ -1,0 +1,89 @@
+version: '3.8'
+
+# ====================================== AIRFLOW COMMON ========================================
+
+x-airflow-common: &airflow-common
+  image: &airflow_image apache/airflow:2.2.2-python3.8
+  environment: &airflow-common-env
+    AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS: 'false'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql://airflow:airflow@postgres:5432/airflow
+    AIRFLOW__CORE__STORE_DAG_CODE: 'true'
+    AIRFLOW__CORE__STORE_SERIALIZED_DAGS: 'true'
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
+    MOVIELENS_USER: 'airflow'
+    MOVIELENS_PASSWORD: 'airflow'
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - logs:/opt/airflow/logs
+  depends_on: &airflow-common-depends-on
+    postgres:
+      condition: service_healthy
+
+# ====================================== /AIRFLOW COMMON =======================================
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "airflow" ]
+      interval: 5s
+      retries: 5
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    ports:
+      - "5432:5432"
+
+  init:
+    image: *airflow_image
+    depends_on:
+      - postgres
+    environment: *airflow-common-env
+    entrypoint: /bin/bash
+    command: -c 'airflow db init && airflow users create --username user --password password --firstname Marin --lastname Marin --role Admin --email admin@example.org'
+
+  webserver:
+    <<: *airflow-common
+    build:
+      context: airflow
+      args:
+        AIRFLOW_BASE_IMAGE: *airflow_image
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test:  [ "CMD", "curl", "--fail", "http://localhost:8080/health" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      init:
+        condition: service_completed_successfully
+
+  scheduler:
+    <<: *airflow-common
+    build:
+      context: airflow
+      args:
+        AIRFLOW_BASE_IMAGE: *airflow_image
+    command: scheduler
+    healthcheck:
+      test: [ "CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"' ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      init:
+        condition: service_completed_successfully
+
+
+volumes:
+  logs:
