@@ -23,3 +23,4 @@ Here is a list of the tests that won't work without the
 code from chapter08 up and running:
 - test_movielens_operators (tests/dags/chapter08/airflow_movielens)
 - test_movielens_operators_with_dag (tests/airflowbook/operators)
+- test_movielens_to_postgres_operator (tests/airflowbook/operators)
