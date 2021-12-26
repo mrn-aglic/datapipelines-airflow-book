@@ -115,7 +115,7 @@ services:
         condition: service_completed_successfully
 
   movielens:
-    build: ../chapter08/movielens-api
+    build: ../../chapter08/movielens-api
     image: airflow/movielens-api
     container_name: chapter10_movielens_api
     networks:

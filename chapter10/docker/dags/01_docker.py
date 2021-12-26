@@ -3,6 +3,7 @@ from datetime import datetime
 
 from airflow import DAG
 from airflow.providers.docker.operators.docker import DockerOperator
+from docker.types import Mount
 
 with DAG(
     dag_id="01_docker",
@@ -11,11 +12,13 @@ with DAG(
     end_date=datetime(2019, 1, 3),
     schedule_interval="@daily",
 ) as dag:
+
     fetch_ratings = DockerOperator(
         task_id="fetch_ratings",
         image="airflowbook/movielens-fetch",
+        auto_remove=True,
         command=[
-            "fetch_ratings",
+            "fetch-ratings",
             "--start_date",
             "{{ ds }}",
             "--end_date",
@@ -29,7 +32,8 @@ with DAG(
             "--host",
             os.environ["MOVIELENS_HOST"],
         ],
-        volumes=["/tmp/airflow/data:/data"],
+        mount_tmp_dir=False,
+        mounts=[Mount(source="/tmp/airflow/data", target="/data", type="bind")],
         network_mode="airflow",  # make sure that the container is attached to the airflow Docker network
         # so that it can reach the API running on the same network
     )
@@ -37,6 +41,7 @@ with DAG(
     rank_movies = DockerOperator(
         task_id="rank_movies",
         image="airflowbook/movielens-rank",
+        auto_remove=True,
         command=[
             "rank-movies",
             "--input_path",
@@ -44,7 +49,8 @@ with DAG(
             "--output_path",
             "/data/rankings/{{ ds }}.json",
         ],
-        volumes=["/tmp/airflow/data:/data"],
+        mount_tmp_dir=False,
+        mounts=[Mount(source="/tmp/airflow/data", target="/data", type="bind")],
     )
 
     fetch_ratings >> rank_movies
