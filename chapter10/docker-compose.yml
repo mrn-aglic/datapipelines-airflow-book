@@ -15,12 +15,21 @@ x-airflow-common: &airflow-common
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
     MOVIELENS_USER: 'airflow'
     MOVIELENS_PASSWORD: 'airflow'
+    MOVIELENS_HOST: 'http://movielens:5010'
   volumes:
     - ./dags:/opt/airflow/dags
     - logs:/opt/airflow/logs
+  networks: &airflow-common-networks
+    airflow:
   depends_on: &airflow-common-depends-on
     postgres:
       condition: service_healthy
+
+x-vols-dags: &vols-dags
+  "./dags:/opt/airflow/dags"
+
+x-vols-logs: &vols-logs
+  "logs:/opt/airflow/logs"
 
 # ====================================== /AIRFLOW COMMON =======================================
 
@@ -35,13 +44,22 @@ services:
       - POSTGRES_USER=airflow
       - POSTGRES_PASSWORD=airflow
       - POSTGRES_DB=airflow
+    networks:
+      <<: *airflow-common-networks
     ports:
       - "5432:5432"
 
   init:
-    image: *airflow_image
+    build:
+      context: airflow-docker
+      args:
+        AIRFLOW_BASE_IMAGE: *airflow_image
+    image: airflowbook/airflow-ch10
+    container_name: chapter10_airflow_init
     depends_on:
-      - postgres
+      <<: *airflow-common-depends-on
+    networks:
+      <<: *airflow-common-networks
     environment: *airflow-common-env
     entrypoint: /bin/bash
     command: -c 'airflow db init && airflow users create --username user --password password --firstname Marin --lastname Marin --role Admin --email admin@example.org'
@@ -49,9 +67,13 @@ services:
   webserver:
     <<: *airflow-common
     build:
-      context: airflow
+      context: airflow-docker
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
+    image: airflowbook/airflow-ch10
+    container_name: chapter10_airflow_webserver
+    networks:
+      <<: *airflow-common-networks
     command: webserver
     ports:
       - "8080:8080"
@@ -69,9 +91,13 @@ services:
   scheduler:
     <<: *airflow-common
     build:
-      context: airflow
+      context: airflow-docker
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
+    image: airflowbook/airflow-ch10
+    container_name: chapter10_airflow_scheduler
+    networks:
+      <<: *airflow-common-networks
     command: scheduler
     healthcheck:
       test: [ "CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"' ]
@@ -79,11 +105,31 @@ services:
       timeout: 10s
       retries: 5
     restart: always
+    volumes:
+      - *vols-dags
+      - *vols-logs
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       <<: *airflow-common-depends-on
       init:
         condition: service_completed_successfully
 
+  movielens:
+    build: ../chapter08/movielens-api
+    image: airflow/movielens-api
+    container_name: chapter10_movielens_api
+    networks:
+      <<: *airflow-common-networks
+    ports:
+      - "5010:5010"
+    environment:
+      API_USER: airflow
+      API_PASSWORD: airflow
+
+networks:
+  airflow:
+    name: airflow
 
 volumes:
   logs:
+    name: ch10_logs
