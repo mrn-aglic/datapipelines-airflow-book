@@ -18,3 +18,9 @@ run-rank:
 
 build-images:
 	docker build --tag airflowbook/movielens-fetch images/movielens-fetch-reqs && docker build --tag airflowbook/movielens-rank images/movielens-rank
+
+build-store-movielens:
+	docker build --tag airflowbook/store-movielens images/store-movielens
+
+build-movielens-postgres:
+	docker build --tag airflowbook/movielens-postgres images/movielens-postgres
