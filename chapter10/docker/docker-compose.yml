@@ -16,6 +16,10 @@ x-airflow-common: &airflow-common
     MOVIELENS_USER: 'airflow'
     MOVIELENS_PASSWORD: 'airflow'
     MOVIELENS_HOST: 'http://movielens:5010'
+#    exercise env variables
+    MOVIELENS_DB_USER: 'airflow'
+    MOVIELENS_DB_PASSWORD: 'airflow'
+    MOVIELENS_DB_HOST: 'movielens_db'
   volumes:
     - ./dags:/opt/airflow/dags
     - logs:/opt/airflow/logs
@@ -125,6 +129,20 @@ services:
     environment:
       API_USER: airflow
       API_PASSWORD: airflow
+
+  movielens_db:
+    build: images/movielens-postgres
+    image: images/movielens-postgres
+    container_name: chapter10_exercise_db
+    networks:
+      <<: *airflow-common-networks
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+
 
 networks:
   airflow:
