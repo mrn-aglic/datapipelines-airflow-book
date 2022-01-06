@@ -1,0 +1,33 @@
+kind: StorageClass # add this storage class to avoid: storageclass.storage.k8s.io "manual" not found
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: manual
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim # Kubernetes specification for a persistent volume claim, which represents a reservation of some of the storage in the specified volume
+metadata:
+  name: data-volume # the name of the volume to claim storage space on
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi # the amount of storage to claim
+---
+apiVersion: v1
+kind: PersistentVolume # Kubernetes specification for defining a persistent volume, a virtual disk that provides space for pods to store data
+metadata:
+  name: data-volume # name of the volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/data"
