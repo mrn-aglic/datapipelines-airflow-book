@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment # Kubernetes specification creating a deployment of a container
+metadata:
+  name: movielens-deployment # name of the deployment
+  labels:
+    app: movielens # labels for deployment which are matched in the service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: movielens
+  template:
+    metadata:
+      labels:
+        app: movielens
+    spec:
+      containers: # specify which containers to include in the deployment
+      - name: movielens
+        image: airflowbook/movielens-api:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5010
+        env:
+        - name: API_USER
+          value: airflow
+        - name: API_PASSWORD
+          value: airflow
+---
+apiVersion: v1 # Kubernetes specification for creating a service, which allows us to connect to a given deployment
+kind: Service
+metadata:
+  name: movielens # selector that matches the labels of the deployment, linking this service to the deployment
+spec:
+  selector:
+    app: movielens
+  ports:
+    - protocol: TCP # mapping the service port (80) to the port exposed by the container in the deployment (5010)
+      port: 80
+      targetPort: 5010

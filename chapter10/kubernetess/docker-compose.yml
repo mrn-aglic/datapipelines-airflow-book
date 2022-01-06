@@ -15,7 +15,8 @@ x-airflow-common: &airflow-common
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
     MOVIELENS_USER: 'airflow'
     MOVIELENS_PASSWORD: 'airflow'
-    MOVIELENS_HOST: 'http://movielens:5010'
+    MOVIELENS_HOST: 'http://movielens.airflowbook.svc.cluster.local:80'
+#    MOVIELENS_HOST: 'http://movielens:5010'
 #    exercise env variables
     MOVIELENS_DB_USER: 'airflow'
     MOVIELENS_DB_PASSWORD: 'airflow'
@@ -58,8 +59,8 @@ services:
       context: airflow-docker
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: airflowbook/airflow-ch10
-    container_name: chapter10_airflow_init
+    image: airflowbook/airflow-ch10-kubernetess
+    container_name: chapter10_airflow_init_kubernetes
     depends_on:
       <<: *airflow-common-depends-on
     networks:
@@ -74,8 +75,8 @@ services:
       context: airflow-docker
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: airflowbook/airflow-ch10
-    container_name: chapter10_airflow_webserver
+    image: airflowbook/airflow-ch10-kubernetess
+    container_name: chapter10_airflow_webserver_kubernetes
     networks:
       <<: *airflow-common-networks
     command: webserver
@@ -98,8 +99,8 @@ services:
       context: airflow-docker
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: airflowbook/airflow-ch10
-    container_name: chapter10_airflow_scheduler
+    image: airflowbook/airflow-ch10-kubernetess
+    container_name: chapter10_airflow_scheduler_kubernetes
     networks:
       <<: *airflow-common-networks
     command: scheduler
@@ -113,6 +114,7 @@ services:
       - *vols-dags
       - *vols-logs
       - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.kube/config:/home/airflow/.kube/config # don't forget this
     depends_on:
       <<: *airflow-common-depends-on
       init:
@@ -121,7 +123,7 @@ services:
   movielens:
     build: ../../chapter08/movielens-api
     image: airflowbook/movielens-api
-    container_name: chapter10_movielens_api
+    container_name: chapter10_kubernetes_movielens_api
     networks:
       <<: *airflow-common-networks
     ports:
@@ -131,7 +133,7 @@ services:
       API_PASSWORD: airflow
 
   movielens_db:
-    build: images/movielens-postgres
+    build: ../docker/images/movielens-postgres
     image: airflowbook/movielens-postgres
     container_name: chapter10_exercise_db
     networks:
