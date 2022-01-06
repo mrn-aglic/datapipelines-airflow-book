@@ -88,6 +88,7 @@ services:
       timeout: 10s
       retries: 5
     restart: always
+    environment: *airflow-common-env
     depends_on:
       <<: *airflow-common-depends-on
       init:
@@ -115,6 +116,7 @@ services:
       - *vols-logs
       - /var/run/docker.sock:/var/run/docker.sock
       - ~/.kube/config:/home/airflow/.kube/config # don't forget this
+    environment: *airflow-common-env
     depends_on:
       <<: *airflow-common-depends-on
       init:
