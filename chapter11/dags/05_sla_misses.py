@@ -18,7 +18,7 @@ def send_slack_message(message):
 default_args = {
     "owner": "test",
     "sla": timedelta(seconds=1),
-    "email": ["mrn.aglic@gmail.com"],
+    "email": ["example@example.com"],
 }
 
 with DAG(
