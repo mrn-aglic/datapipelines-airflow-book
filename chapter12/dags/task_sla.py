@@ -16,7 +16,7 @@ def send_slack_message(message):
 
 dag = DAG(
     dag_id="ch12-task_sla",
-    default_args={"email": "mrn.aglic@gmail.com"},
+    default_args={"email": "myname@gmail.com"},
     # schedule_interval="@daily",
     schedule_interval=datetime.timedelta(hours=12),
     sla_miss_callback=sla_miss_callback,

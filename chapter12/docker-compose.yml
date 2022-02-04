@@ -4,6 +4,8 @@ version: '3.8'
 
 x-airflow-common: &airflow-common
   image: &airflow_image apache/airflow:2.2.3-python3.8
+#  build:
+#    context: airflow_docker
   environment: &airflow-common-env
     AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
@@ -15,6 +17,17 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__STORE_DAG_CODE: 'true'
     AIRFLOW__CORE__STORE_SERIALIZED_DAGS: 'true'
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
+    AIRFLOW__METRICS__STATSD_HOST: 'statsd_exporter'
+    AIRFLOW__METRICS__STATSD_ON: 'true'
+    AIRFLOW__METRICS__STATSD_PORT: 9125
+    # configure email sending
+    AIRFLOW__SMTP__SMTP_HOST: smtp.gmail.com
+    AIRFLOW__SMTP__SMTP_MAIL_FROM: myname@gmail.com
+    AIRFLOW__SMTP__SMTP_PASSWORD: generate 16 digit app password
+    AIRFLOW__SMTP__SMTP_PORT: 587
+    AIRFLOW__SMTP__SMTP_SSL: 'false'
+    AIRFLOW__SMTP__SMTP_STARTTLS: 'true'
+    AIRFLOW__SMTP__SMTP_USER: myname@gmail.com
   volumes:
     - ./dags:/opt/airflow/dags
     - logs:/opt/airflow/logs
@@ -129,6 +142,39 @@ services:
       - "5555:5555"
     environment: *airflow-common-env
     command: celery flower
+
+  # monitoring
+  statsd_exporter:
+    image: prom/statsd-exporter
+    restart: always
+    volumes:
+      - ./files/statsd_mapping.yml:/tmp/statsd_mapping.yml
+    ports:
+      - "9102:9102"
+      - "9125:9125/udp"
+    command: --statsd.mapping-config=/tmp/statsd_mapping.yml
+
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    volumes:
+      - ./files/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    command:
+      - --web.enable-admin-api
+      - --web.enable-lifecycle
+      # Flags below are defaults, but must be added explicitly, otherwise would be overridden by flags above
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+
+  grafana:
+    image: grafana/grafana
+    restart: always
+    ports:
+      - "3000:3000"
 
 volumes:
   logs:
