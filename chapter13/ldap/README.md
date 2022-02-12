@@ -1,7 +1,7 @@
 # LDAP
 
 Demonstrate RBAC UI + LDAP authentication using OpenLDAP.
-Login in Airflow with username `bsmith` and password `test`.
+Login in Airflow with username `aflow` and password `test`.
 
 ## Details
 
