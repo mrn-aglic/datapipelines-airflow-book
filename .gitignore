@@ -12,3 +12,5 @@ chapter08/dags/custom/__pycache__
 __pycache__
 chapter10/docker/data
 chapter12/logs
+chapter13/certs
+*.pem
