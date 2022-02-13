@@ -101,6 +101,19 @@ services:
     ports:
       - "5433:5432"
 
+  taxi_fileserver:
+    build:
+      context: ./services/taxi_fileserver
+    environment:
+      - POSTGRES_HOST=taxi_db
+      - POSTGRES_PORT=5433
+      - POSTGRES_USERNAME=taxi
+      - POSTGRES_PASSWORD=ridetlc
+      - POSTGRES_DATABASE=tlctriprecords
+    depends_on:
+      - taxi_db
+    ports:
+      - "8081:80"
 
   # the city bike data endpoint
 
