@@ -1,7 +1,7 @@
 FROM postgres:14-alpine AS builder
 
 #ENV POSTGRES_HOST_AUTH_METHOD=trust
-ENV POSTGRES_PASSWORD=super_sercret_taxi_password
+ENV POSTGRES_PASSWORD=super_sercret_citibike_password
 
 COPY postgres-init.sh /docker-entrypoint-initdb.d/postgres-init.sh
 
