@@ -20,13 +20,18 @@ The data is available on the following endpoints:
 1. taxi_db - pull the data from s3 online storage and store it to
 postgresql database (see notes below). Connect to db directly with
 user: taxi, password: ridetlc. Database name: `tlctriprecords`.
+Run service with: `docker-compose up taxi_db`.
 2. taxi_fileserver - serves the data from the taxi_db data dataset
-as csv files.
+as csv files. Run service with: `docker-compose up taxi_fileserver`.
 3. citibike_db - pull the data from s3 online storage and store it to
 postgresql database (see notes below). Connect to db directly with
 user: citi, password: cycling. Database name: `citibike`.
+Run service with: `docker-compose up citibike_db`.
 4. citibike_api - pretty straightforward. Note that the SQL query
 includes an offset so that we simulate data for each year.
+Run service with:`docker-compose up citibike_api`.
+5. minio and minio/mc - run together with:
+`docker-compose up minio minio_init` (see notes below).
 
 
 ### Taxi_db notes
@@ -53,3 +58,19 @@ The available file can be accessed via `localhost:8081/filename`.
 
 ### Citibike_db notes
 As for taxi_db, the data is loaded for the year 2020.
+
+### Minio and minio mc notes
+To enable these services. you first need to copy .env_backup
+to .env. Enter the root user and root password information
+and start up minio with `docker-compose up minio`. Then login
+into the minio service on port `localhost:9000` and create a service
+account. Copy and paste the access and secret keys into the .env file
+variables MC_ACCESS_KEY and MC_SECRET_KEY. You can stop
+the minio service now.
+
+You can also rename the bucket that is created with the mc client.
+The name of the bucket is stored in the BUCKET_NAME environment
+variable in docker-compose.
+
+You can start both minio and minio mc using:
+`docker-compose up minio minio_init`.
