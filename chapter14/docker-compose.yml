@@ -117,5 +117,11 @@ services:
 
   # the city bike data endpoint
 
+  citibike_db:
+    build:
+      context: services/citibike_db
+    ports:
+      - "5434:5432"
+
 volumes:
   logs:

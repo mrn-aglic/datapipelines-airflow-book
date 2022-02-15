@@ -18,7 +18,14 @@ The data is available on the following endpoints:
 
 ## My implementation steps
 1. taxi_db - pull the data from s3 online storage and store it to
-postgresql database (see notes below).
+postgresql database (see notes below). Connect to db directly with
+user: taxi, password: ridetlc. Database name: `tlctriprecords`.
+2. taxi_fileserver - serves the data from the taxi_db data dataset
+as csv files.
+3. citibike_db - pull the data from s3 online storage and store it to
+postgresql database (see notes below). Connect to db directly with
+user: citi, password: cycling. Database name: `citibike`.
+4.
 
 
 ### Taxi_db notes
@@ -29,3 +36,19 @@ use the data from 2020.
 Just like the author states in the GitHub repo for the book,
 the docker image will become very large if we take all of the
 data. Therefore, data is taken only every X lines.
+
+### Taxi_fileserver notes
+serves the data from the taxi_db data dataset
+as csv files. The index `localhost:8081` returns the list of
+available csvs. Two scripts generate the csv files:
+   - `get_last_hour.sh` generates the csv containing the data
+   "for the last 15 minutes". Note that the year may is different.
+   The script is run every 15 minutes and deletes csv files
+   older than an hour.
+   - `get_last_hour_reboot.sh` is called when the system is
+   rebooted to generate csvs that we can use.
+
+The available file can be accessed via `localhost:8081/filename`.
+
+### Citibike_db notes
+As for taxi_db, the data is loaded for the year 2020.

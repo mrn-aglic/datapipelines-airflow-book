@@ -32,18 +32,18 @@ EOSQL
 
 # Load data
 urls="
-https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_$YEAR-01.csv
-https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_$YEAR-02.csv
-https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_$YEAR-03.csv
-https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_$YEAR-04.csv
-https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_$YEAR-05.csv
-https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_$YEAR-06.csv
-https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_$YEAR-07.csv
-https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_$YEAR-08.csv
-https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_$YEAR-09.csv
-https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_$YEAR-10.csv
-https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_$YEAR-11.csv
-https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_$YEAR-12.csv
+https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_${YEAR}-01.csv
+https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_${YEAR}-02.csv
+https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_${YEAR}-03.csv
+https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_${YEAR}-04.csv
+https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_${YEAR}-05.csv
+https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_${YEAR}-06.csv
+https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_${YEAR}-07.csv
+https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_${YEAR}-08.csv
+https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_${YEAR}-09.csv
+https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_${YEAR}-10.csv
+https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_${YEAR}-11.csv
+https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_${YEAR}-12.csv
 "
 
 for url in ${urls}
