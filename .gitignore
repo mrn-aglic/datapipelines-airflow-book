@@ -14,3 +14,4 @@ chapter10/docker/data
 chapter12/logs
 chapter13/certs
 *.pem
+chapter14/services/minio/.env

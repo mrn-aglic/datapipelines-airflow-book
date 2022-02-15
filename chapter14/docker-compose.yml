@@ -14,8 +14,8 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__STORE_SERIALIZED_DAGS: 'true'
     AIRFLOW__CORE__FERNET_KEY: EomypBljHcoY3zkxIznIgc5RNdnCjDB9WuHcLziXgu8=
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
-#    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT: /opt/airflow/certs/certificate.pem
-#    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY: /opt/airflow/certs/privatekey.pem
+  #    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT: /opt/airflow/certs/certificate.pem
+  #    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY: /opt/airflow/certs/privatekey.pem
   volumes:
     - ./dags:/opt/airflow/dags
     - logs:/opt/airflow/logs
@@ -24,10 +24,10 @@ x-airflow-common: &airflow-common
       condition: service_healthy
 
 x-vols-dags: &vols-dags
-  "./dags:/opt/airflow/dags"
+               "./dags:/opt/airflow/dags"
 
 x-vols-logs: &vols-logs
-  "logs:/opt/airflow/logs"
+               "logs:/opt/airflow/logs"
 
 # ====================================== /AIRFLOW COMMON =======================================
 
@@ -60,7 +60,7 @@ services:
     ports:
       - "8080:8080"
     healthcheck:
-      test:  [ "CMD", "curl", "--fail", "http://localhost:8080/health" ]
+      test: [ "CMD", "curl", "--fail", "http://localhost:8080/health" ]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -134,9 +134,47 @@ services:
       - POSTGRES_DATABASE=citibike
       - DATA_YEAR=2020
     depends_on:
-        - citibike_db
+      - citibike_db
     ports:
       - "8082:5010"
 
+  # Minio (local s3) configurations
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    #    environment:
+    env_file:
+      - services/minio/.env
+    command: server --console-address ":9001" /data
+    volumes:
+      - s3:/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  minio_init:
+    image: minio/mc
+    env_file:
+      - services/minio/.env
+    environment:
+      - BUCKET_NAME=datalake
+    depends_on:
+      - minio
+    entrypoint: [ "/bin/sh", "-c",
+        "while ! curl -sI --head http://minio:9000/minio/health/live | grep -o 'HTTP/1.1 200 OK';
+        do echo 'Waiting 1 sec for MinIO to be healthy...' && sleep 1; done;
+        echo 'MinIO is available.';
+        while ! /usr/bin/mc config host add minio http://minio:9000 $${MC_ACCESS_KEY} $${MC_SECRET_KEY}; do echo 'MinIO not up and running yet...' && sleep 1; done;
+        echo 'Added mc host config.';
+        /usr/bin/mc mb minio/$${BUCKET_NAME};
+        exit 0;" ]
+
+
+
 volumes:
   logs:
+  s3:
