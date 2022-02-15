@@ -123,5 +123,20 @@ services:
     ports:
       - "5434:5432"
 
+  citibike_api:
+    build:
+      context: services/citibike_api
+    environment:
+      - POSTGRES_HOST=citibike_db
+      - POSTGRES_PORT=5434
+      - POSTGRES_USERNAME=city
+      - POSTGRES_PASSWORD=cycling
+      - POSTGRES_DATABASE=citibike
+      - DATA_YEAR=2020
+    depends_on:
+        - citibike_db
+    ports:
+      - "8082:5010"
+
 volumes:
   logs:
