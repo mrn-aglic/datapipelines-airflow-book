@@ -25,7 +25,8 @@ as csv files.
 3. citibike_db - pull the data from s3 online storage and store it to
 postgresql database (see notes below). Connect to db directly with
 user: citi, password: cycling. Database name: `citibike`.
-4.
+4. citibike_api - pretty straightforward. Note that the SQL query
+includes an offset so that we simulate data for each year.
 
 
 ### Taxi_db notes
