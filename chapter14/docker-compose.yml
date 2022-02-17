@@ -144,7 +144,7 @@ services:
       - "8082:5010"
 
   # Minio (local s3) configurations
-  minios3:
+  minio-s3:
     image: minio/minio
     ports:
       - "9000:9000"
@@ -167,12 +167,12 @@ services:
     environment:
       - BUCKET_NAME=datalake
     depends_on:
-      - minios3
+      - minio-s3
     entrypoint: [ "/bin/sh", "-c",
-        "while ! curl -sI --head http://minios3:9000/minio/health/live | grep -o 'HTTP/1.1 200 OK';
+        "while ! curl -sI --head http://minio-s3:9000/minio/health/live | grep -o 'HTTP/1.1 200 OK';
         do echo 'Waiting 1 sec for MinIO to be healthy...' && sleep 1; done;
         echo 'MinIO is available.';
-        while ! /usr/bin/mc config host add minio http://minios3:9000 $${MC_ACCESS_KEY} $${MC_SECRET_KEY}; do echo 'MinIO not up and running yet...' && sleep 1; done;
+        while ! /usr/bin/mc config host add minio http://minio-s3:9000 $${MC_ACCESS_KEY} $${MC_SECRET_KEY}; do echo 'MinIO not up and running yet...' && sleep 1; done;
         echo 'Added mc host config.';
         /usr/bin/mc mb minio/$${BUCKET_NAME};
         exit 0;" ]

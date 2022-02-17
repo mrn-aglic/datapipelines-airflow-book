@@ -30,9 +30,9 @@ Run service with: `docker-compose up citibike_db`.
 4. citibike_api - pretty straightforward. Note that the SQL query
 includes an offset so that we simulate data for each year.
 Run service with:`docker-compose up citibike_api`.
-5. minio and minio/mc - run together with:
-`docker-compose up minio minio_init` (see notes below).
-
+5. minio (minio-s3) and minio/mc - run together with:
+`docker-compose up minio-s3 minio_init` (see notes below).
+6. implementing the first DAG and download citibike data task.
 
 ### Taxi_db notes
 I like using with newish things. So I looked up the availability
@@ -62,7 +62,7 @@ As for taxi_db, the data is loaded for the year 2020.
 ### Minio and minio mc notes
 To enable these services. you first need to copy .env_backup
 to .env. Enter the root user and root password information
-and start up minio with `docker-compose up minio`. Then login
+and start up minio with `docker-compose up minio_s3`. Then login
 into the minio service on port `localhost:9000` and create a service
 account. Copy and paste the access and secret keys into the .env file
 variables MC_ACCESS_KEY and MC_SECRET_KEY. You can stop
@@ -73,4 +73,16 @@ The name of the bucket is stored in the BUCKET_NAME environment
 variable in docker-compose.
 
 You can start both minio and minio mc using:
-`docker-compose up minio minio_init`.
+`docker-compose up minio-s3 minio_init`.
+
+### Airflow Notes
+Airflow services use the `chapter14/.env` file for "secrets". For example, the .env file contains
+the following environment variables:
+- `AIRFLOW_CONN_CITIBIKE`: citibike api url with credentials (since these are in sh, I made no attempt
+to hide them). However, they definitely should be a secret in production systems.
+- `AIRFLOW_CONN_S3`: the connection for minio. I reused the access and secret keys from Minio MC
+for this connection id. Note that the connection has to be URL escaped, e.g.:
+
+   `AIRFLOW_CONN_S3=s3://<access_key>:<secret_key>@?host=http%3A%2F%2Fminio-s3%3A9000`
+
+Copy the .env_backup file and fill in the missing values.
