@@ -56,7 +56,11 @@ services:
 
   webserver:
     <<: *airflow-common
-    image: *airflow_image
+#    image: *airflow_image
+    build:
+      context: airflow-docker
+      args:
+        AIRFLOW_BASE_IMAGE: *airflow_image
     command: webserver
     ports:
       - "8080:8080"

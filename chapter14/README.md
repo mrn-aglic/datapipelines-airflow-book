@@ -33,6 +33,7 @@ Run service with:`docker-compose up citibike_api`.
 5. minio (minio-s3) and minio/mc - run together with:
 `docker-compose up minio-s3 minio_init` (see notes below).
 6. implementing the first DAG and download citibike data task.
+Implementing the download taxi data task.
 
 ### Taxi_db notes
 I like using with newish things. So I looked up the availability

@@ -1,3 +1,6 @@
 [submodule "chapter08/airflow_book_package"]
 	path = chapter08/airflow_book_package
 	url = https://github.com/mrn-aglic/airflow_book_example_package_repo
+[submodule "chapter14/nyc_operators"]
+	path = chapter14/nyc_operators
+	url = https://github.com/mrn-aglic/nyc_operators.git
