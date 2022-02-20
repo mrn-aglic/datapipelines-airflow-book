@@ -83,7 +83,11 @@ services:
 
   scheduler:
     <<: *airflow-common
-    image: *airflow_image
+#    image: *airflow_image
+    build:
+      context: airflow-docker
+      args:
+        AIRFLOW_BASE_IMAGE: *airflow_image
     command: scheduler
     healthcheck:
       test: [ "CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"' ]
