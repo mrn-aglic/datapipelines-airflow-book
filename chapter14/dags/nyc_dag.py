@@ -1,5 +1,6 @@
 import json
 
+import geopandas
 import pandas as pd
 import requests
 from airflow import DAG
@@ -41,6 +42,27 @@ def _download_taxi_data():
     return exported_files
 
 
+def _transform_taxi_data(df):
+    df[["picku_datetime", "dropoff_datetime"]] = df[
+        ["pickup_datetime", "dropoff_datetime"]
+    ].apply(pd.to_datetime)
+
+    df["tripduration"] = (
+        (df["dropoff_datetime"] - df["pickup_datetime"]).dt.total.seconds().astype(int)
+    )
+
+    df = df.rename(
+        columns={
+            "pickup_datetime": "starttime",
+            "pickup_locationid": "start_location_id",
+            "dropoff_datetime": "stoptime",
+            "dropoff_locationid": "end_location_id",
+        }
+    ).drop(columns=["trip_distance"])
+
+    return df
+
+
 def _download_citibike_data(ts_nodash, **_):
     citibike_conn = BaseHook.get_connection(conn_id="citibike")
 
@@ -62,6 +84,44 @@ def _download_citibike_data(ts_nodash, **_):
         print(f"Uploaded file {s3_key}")
     except ValueError:
         print(f"File {s3_key} already exists.")
+
+
+def _transform_citibike_data(df):
+    # Map citi bike lat,lon coordinates to taxi zone ids
+    taxi_zones = geopandas.read_file(
+        "https://s3.amazonaws.com/nyc-tlc/misc/taxi_zones.zip"
+    ).to_crs("EPSG:4326")
+    start_gdf = geopandas.GeoDataFrame(
+        df,
+        crs="EPSG:4326",
+        geometry=geopandas.points_from_xy(
+            df["start_station_longitude"], df["start_station_latitude"]
+        ),
+    )
+    end_gdf = geopandas.GeoDataFrame(
+        df,
+        crs="EPSG:4326",
+        geometry=geopandas.points_from_xy(
+            df["end_station_longitude"], df["end_station_latitude"]
+        ),
+    )
+    df_with_zones = geopandas.sjoin(
+        start_gdf, taxi_zones, how="left", op="within"
+    ).rename(columns={"LocationID": "start_location_id"})
+
+    end_zones = geopandas.sjoin(end_gdf, taxi_zones, how="left", op="within")
+
+    df_with_zones["end_location_id"] = end_zones["LocationID"]
+
+    return df_with_zones[
+        [
+            "tripduration",
+            "starttime",
+            "start_location_id",
+            "stoptime",
+            "end_location_id",
+        ]
+    ]
 
 
 dag = DAG(
@@ -96,5 +156,23 @@ transform_taxi_data = PandasOperator(
 download_citibike_data = PythonOperator(
     task_id="download_citibike_data", python_callable=_download_citibike_data, dag=dag
 )
+transform_citibike_data = PandasOperator(
+    task_id="process_citibike_data",
+    input_callable=get_minio_object,
+    input_callable_kwargs={
+        "pandas_read_callable": pd.read_csv,
+        "bucket": Variable.get("MC_BUCKET_NAME"),  # os.environ["MC_BUCKET_NAME"],
+        "paths": "{{ ti.xcom_pull(task_ids='taxi_extract_transform.download_taxi_data') }}",
+    },
+    transform_callable=_transform_citibike_data,
+    output_callable=write_minio_object,
+    output_callable_kwargs={
+        "bucket": Variable.get("MC_BUCKET_NAME"),  # os.environ["MC_BUCKET_NAME"],
+        "path": "processed/taxi/{{ ts_nodash }}.parquet",
+        "pandas_write_callable": pd.DataFrame.to_parquet,
+        "pandas_write_callable_kwargs": {"engine": "auto"},
+    },
+)
+
 download_taxi_data >> transform_taxi_data
-download_citibike_data
+download_citibike_data >> transform_citibike_data
