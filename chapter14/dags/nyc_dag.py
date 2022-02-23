@@ -83,7 +83,7 @@ transform_taxi_data = PandasOperator(
         "bucket": Variable.get("MC_BUCKET_NAME"),  # os.environ["MC_BUCKET_NAME"],
         "paths": "{{ ti.xcom_pull(task_ids='taxi_extract_transform.download_taxi_data') }}",
     },
-    transform_callable=None,
+    transform_callable=_transform_taxi_data,
     output_callable=write_minio_object,
     output_callable_kwargs={
         "bucket": Variable.get("MC_BUCKET_NAME"),  # os.environ["MC_BUCKET_NAME"],
