@@ -34,6 +34,16 @@ Run service with:`docker-compose up citibike_api`.
 `docker-compose up minio-s3 minio_init` (see notes below).
 6. implementing the first DAG and download citibike data task.
 Implementing the download taxi data task.
+7. Implementing the PandasOperator in a separate package called
+nyctransport (directory nyc_operators)
+8. Implementing minio_helpers - the get_minio_object and
+write_minio object operators
+9. Used the functions developed in points 7 and 8 to write
+the `transform_taxi_data` operator (without the
+transform function).
+10. Implemented the transform data function for the taxi data.
+11. Implemented the the `transform_citibike_data` operator.
+
 
 ### Taxi_db notes
 I like using with newish things. So I looked up the availability
@@ -87,3 +97,10 @@ for this connection id. Note that the connection has to be URL escaped, e.g.:
    `AIRFLOW_CONN_S3=s3://<access_key>:<secret_key>@?host=http%3A%2F%2Fminio-s3%3A9000`
 
 Copy the .env_backup file and fill in the missing values.
+
+
+### Separate package
+As part of point 7, the PandasOperator is implemented as a separate
+package and installed in the docker image during docker build.
+The source for the package is included in this project
+as a git submodule. You can navigate to the repo of the package.

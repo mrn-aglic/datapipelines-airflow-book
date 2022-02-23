@@ -9,4 +9,5 @@ RUN apt-get -y install git
 USER airflow
 RUN python -m pip install --upgrade git+https://github.com/mrn-aglic/nyc_operators.git
 RUN pip install --user --no-cache-dir \
-    minio
+    minio \
+    geopandas
