@@ -1,5 +1,4 @@
 import io
-import json
 
 import pandas as pd
 from airflow.hooks.base import BaseHook
@@ -11,9 +10,7 @@ def get_minio_object(
 ):
     s3_conn = BaseHook.get_connection(conn_id="s3")
 
-    # let's be real, this should be handled somehow with the jinja template, but it is
-    # currently simpler to put it here.
-    paths = json.loads(paths.replace("'", '"'))
+    print(paths)
 
     minio_client = Minio(
         s3_conn.extra_dejson["host"].split("://")[1],

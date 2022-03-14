@@ -9,8 +9,8 @@ from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.utils.dates import days_ago
-from flask_httpauth import HTTPBasicAuth
 from nyctransport.operators.pandas_operator import PandasOperator
+from requests.auth import HTTPBasicAuth
 from shared.minio_helpers import get_minio_object, write_minio_object
 
 
@@ -24,15 +24,17 @@ def _download_taxi_data():
     files = response.json()
 
     exported_files = []
+    bucket = Variable.get("MC_BUCKET_NAME")
 
     for filename in [f["name"] for f in files]:
         response = requests.get(f"{url}/{filename}")
         s3_key = f"raw/taxi/{filename}"
         try:
+            s3_hook.delete_objects(bucket=bucket, keys=[s3_key])
             s3_hook.load_string(
                 string_data=response.text,
                 key=s3_key,
-                bucket_name=Variable.get("MC_BUCKET_NAME"),
+                bucket_name=bucket,
             )
             print(f"Uplaoded file {s3_key} to Minio.")
             exported_files.append(s3_key)
@@ -43,12 +45,13 @@ def _download_taxi_data():
 
 
 def _transform_taxi_data(df):
-    df[["picku_datetime", "dropoff_datetime"]] = df[
+    df[["pickup_datetime", "dropoff_datetime"]] = df[
         ["pickup_datetime", "dropoff_datetime"]
     ].apply(pd.to_datetime)
 
+    print(df.info())
     df["tripduration"] = (
-        (df["dropoff_datetime"] - df["pickup_datetime"]).dt.total.seconds().astype(int)
+        (df["dropoff_datetime"] - df["pickup_datetime"]).dt.total_seconds().astype(int)
     )
 
     df = df.rename(
@@ -129,6 +132,7 @@ dag = DAG(
     start_date=days_ago(1),
     schedule_interval="*/15 * * * *",
     catchup=False,
+    render_template_as_native_obj=True,
 )
 
 download_taxi_data = PythonOperator(
@@ -141,7 +145,7 @@ transform_taxi_data = PandasOperator(
     input_callable_kwargs={
         "pandas_read_callable": pd.read_csv,
         "bucket": Variable.get("MC_BUCKET_NAME"),  # os.environ["MC_BUCKET_NAME"],
-        "paths": "{{ ti.xcom_pull(task_ids='taxi_extract_transform.download_taxi_data') }}",
+        "paths": "{{ ti.xcom_pull(task_ids='download_taxi_data') }}",
     },
     transform_callable=_transform_taxi_data,
     output_callable=write_minio_object,
@@ -151,6 +155,7 @@ transform_taxi_data = PandasOperator(
         "pandas_write_callable": pd.DataFrame.to_parquet,
         "pandas_write_callable_kwargs": {"engine": "auto"},
     },
+    dag=dag,
 )
 
 download_citibike_data = PythonOperator(
@@ -160,18 +165,19 @@ transform_citibike_data = PandasOperator(
     task_id="process_citibike_data",
     input_callable=get_minio_object,
     input_callable_kwargs={
-        "pandas_read_callable": pd.read_csv,
+        "pandas_read_callable": pd.read_json,
         "bucket": Variable.get("MC_BUCKET_NAME"),  # os.environ["MC_BUCKET_NAME"],
-        "paths": "{{ ti.xcom_pull(task_ids='taxi_extract_transform.download_taxi_data') }}",
+        "paths": "raw/citibike/{{ ts_nodash }}.json",
     },
     transform_callable=_transform_citibike_data,
     output_callable=write_minio_object,
     output_callable_kwargs={
         "bucket": Variable.get("MC_BUCKET_NAME"),  # os.environ["MC_BUCKET_NAME"],
-        "path": "processed/taxi/{{ ts_nodash }}.parquet",
+        "path": "processed/citibike/{{ ts_nodash }}.parquet",
         "pandas_write_callable": pd.DataFrame.to_parquet,
         "pandas_write_callable_kwargs": {"engine": "auto"},
     },
+    dag=dag,
 )
 
 download_taxi_data >> transform_taxi_data

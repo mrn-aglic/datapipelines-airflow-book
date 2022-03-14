@@ -2,6 +2,7 @@ import os
 from datetime import date
 
 import psycopg2
+import psycopg2.extras
 from flask import Flask, Response, jsonify
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -70,7 +71,7 @@ def get_recent_rides(period: str, amount: str):
     year_offset = date.today().year - int(os.environ["DATA_YEAR"])
     conn = _get_connection()
 
-    with conn.cursor() as cursor:
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
         query = sql_queries["default"](year_offset, amount, period)
         cursor.execute(query)
         data = cursor.fetchall()
