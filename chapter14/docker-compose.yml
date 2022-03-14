@@ -185,6 +185,15 @@ services:
         /usr/bin/mc mb minio/$${BUCKET_NAME};
         exit 0;" ]
 
+  # result_db service for storing the results of the transformations
+  result_db:
+    image: postgres:14-alpine
+    env_file:
+      - services/.env
+    volumes:
+      - ./services/result_db/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    ports:
+      - "5435:5432"
 
 
 volumes:
