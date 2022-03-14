@@ -43,6 +43,9 @@ the `transform_taxi_data` operator (without the
 transform function).
 10. Implemented the transform data function for the taxi data.
 11. Implemented the the `transform_citibike_data` operator.
+12. Add the `result_db` service to ensure we have a place to store
+the results of the transformations.
+13. Implement the S3 to postgres operator in the separate package.
 
 
 ### Taxi_db notes
