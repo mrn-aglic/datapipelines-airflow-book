@@ -3,7 +3,7 @@ version: '3.8'
 # ====================================== AIRFLOW COMMON ========================================
 
 x-airflow-common: &airflow-common
-  image: &airflow_image apache/airflow:2.2.2-python3.8
+  image: &airflow_image apache/airflow:2.2.4-python3.8
   environment: &airflow-common-env
     AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -195,6 +195,19 @@ services:
     ports:
       - "5435:5432"
 
+  # service for providing html page with results
+  nyc_api:
+    build:
+      context: ./services/nyc_transportation_api
+    depends_on:
+      - result_db
+    env_file:
+      - ./services/.env
+    environment:
+      - POSTGRES_HOST=result_db
+      - POSTGRES_PORT=5432
+    ports:
+      - "8083:5000"
 
 volumes:
   logs:
