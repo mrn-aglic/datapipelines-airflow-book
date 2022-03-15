@@ -46,6 +46,8 @@ transform function).
 12. Add the `result_db` service to ensure we have a place to store
 the results of the transformations.
 13. Implement the S3 to postgres operator in the separate package.
+14. Implement the S3 to database tasks for both citibike and taxi
+data.
 
 
 ### Taxi_db notes

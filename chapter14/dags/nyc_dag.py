@@ -1,3 +1,4 @@
+import io
 import json
 
 import geopandas
@@ -10,6 +11,7 @@ from airflow.operators.python import PythonOperator
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.utils.dates import days_ago
 from nyctransport.operators.pandas_operator import PandasOperator
+from nyctransport.operators.s3_to_postgres import MinioPandasToPostgresOperator
 from requests.auth import HTTPBasicAuth
 from shared.minio_helpers import get_minio_object, write_minio_object
 
@@ -158,6 +160,18 @@ transform_taxi_data = PandasOperator(
     dag=dag,
 )
 
+taxi_to_db = MinioPandasToPostgresOperator(
+    task_id="taxi_to_db",
+    minio_conn_id="s3",
+    minio_bucket=Variable.get("MC_BUCKET_NAME"),
+    minio_key="processed/taxi/{{ ts_nodash }}.parquet",
+    pandas_read_callable=pd.read_parquet,
+    postgres_conn_id="result_db",
+    postgres_table="taxi_rides",
+    pre_read_transform=lambda x: io.BytesIO(x.data),
+    dag=dag,
+)
+
 download_citibike_data = PythonOperator(
     task_id="download_citibike_data", python_callable=_download_citibike_data, dag=dag
 )
@@ -180,5 +194,18 @@ transform_citibike_data = PandasOperator(
     dag=dag,
 )
 
-download_taxi_data >> transform_taxi_data
-download_citibike_data >> transform_citibike_data
+citibke_to_db = MinioPandasToPostgresOperator(
+    task_id="citibike_to_db",
+    minio_conn_id="s3",
+    minio_bucket=Variable.get("MC_BUCKET_NAME"),
+    minio_key="processed/citibike/{{ ts_nodash }}.parquet",
+    pandas_read_callable=pd.read_parquet,
+    postgres_conn_id="result_db",
+    postgres_table="citi_bike_rides",
+    pre_read_transform=lambda x: io.BytesIO(x.data),
+    dag=dag,
+)
+
+
+download_taxi_data >> transform_taxi_data >> taxi_to_db
+download_citibike_data >> transform_citibike_data >> citibke_to_db
