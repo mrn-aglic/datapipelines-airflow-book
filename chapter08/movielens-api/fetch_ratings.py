@@ -36,7 +36,7 @@ def main(start_date, end_date, output_path):
 def fetch_ratings():
     """Fetches ratings from the given URL."""
 
-    url = "http://files.grouplens.org/datasets/movielens/ml-25m.zip"
+    url = "https://files.grouplens.org/datasets/movielens/ml-25m.zip"
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_path = Path(tmp_dir, "download.zip")

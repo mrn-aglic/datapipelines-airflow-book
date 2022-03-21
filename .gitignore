@@ -17,3 +17,4 @@ chapter13/certs
 chapter14/services/minio/.env
 chapter14/.env
 chapter14/services/.env
+chapter16/.env
