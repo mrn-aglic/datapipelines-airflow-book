@@ -1,6 +1,6 @@
 # Chapter 16 - Airflow on AWS
 
-This Readme is taken directly from the book GitHub repo.
+This Readme is taken directly from the [book GitHub repo](https://github.com/BasPH/data-pipelines-with-apache-airflow).
 Just makes sure that the aws secret you generate doesn't
 have any special characters: +, / or %.
 
