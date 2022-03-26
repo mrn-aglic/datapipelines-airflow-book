@@ -53,7 +53,7 @@ services:
       context: airflow-azure
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: airflow-ch16/airflow-aws
+    image: airflow-ch17/airflow-azure
     depends_on:
       *airflow-common-depends-on
     environment: *airflow-common-env
