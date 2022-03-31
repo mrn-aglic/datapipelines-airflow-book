@@ -1,0 +1,9 @@
+webserver:
+  service:
+    type: LoadBalancer
+
+workers:
+  keda:
+    enabled: True
+  persistence:
+    enabled: False
