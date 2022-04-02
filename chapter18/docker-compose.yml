@@ -16,9 +16,10 @@ x-airflow-common: &airflow-common
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
     # Movielens settings
     AIRFLOW_CONN_MOVIELENS: http://${MOVIELENS_USER}:${MOVIELENS_PASSWORD}@movielens-api
-    # Azure setttings.
-    AIRFLOW_CONN_WASB_CONN: wasb://${BLOB_ACCOUNT_NAME}:${BLOB_ACCOUNT_KEY}@azure
-    AIRFLOW_CONN_ODBC_CONN: odbc://${SYNAPSE_USER}:${SYNAPSE_PASSWORD}@${SYNAPSE_HOST}/${SYNAPSE_DB}
+    # GCP setttings.
+#    AIRFLOW_CONN_GCP: google-cloud-platform://user:password@?__extra__=
+#    AIRFLOW_CONN_GCP: google-cloud-platform://user:password@?extra__google_cloud_platform__keyfile_dict=${GCP_KEY}'
+
   volumes:
     - ./dags:/opt/airflow/dags
     - logs:/opt/airflow/logs
@@ -50,10 +51,10 @@ services:
 
   initdb:
     build:
-      context: airflow-azure
+      context: airflow-gcp
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: airflow-ch17/airflow-azure
+    image: airflow-ch18/airflow-gcp
     depends_on:
       *airflow-common-depends-on
     environment: *airflow-common-env
@@ -63,10 +64,10 @@ services:
   webserver:
     <<: *airflow-common
     build:
-      context: airflow-azure
+      context: airflow-gcp
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: airflow-ch17/airflow-azure
+    image: airflow-ch18/airflow-gcp
     command: webserver
     ports:
       - "8080:8080"
@@ -91,10 +92,10 @@ services:
     <<: *airflow-common
     #    image: *airflow_image
     build:
-      context: airflow-azure
+      context: airflow-gcp
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: airflow-ch17/airflow-azure
+    image: airflow-ch18/airflow-gcp
     command: scheduler
     healthcheck:
       test: [ "CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"' ]
@@ -108,7 +109,6 @@ services:
     volumes:
       - *vols-dags
       - *vols-logs
-      - data:/data
     depends_on:
       <<: *airflow-common-depends-on
       initdb:
@@ -125,5 +125,4 @@ services:
       API_PASSWORD: airflow
 
 volumes:
-  data:
   logs:
