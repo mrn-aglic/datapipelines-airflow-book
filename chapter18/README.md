@@ -1,7 +1,5 @@
 # Chapter 18 - GCP
 
-Most of this Readme is taken directly from the book [GitHub repo](https://github.com/BasPH/data-pipelines-with-apache-airflow).
-
 Note that for setting up gke cluster, I had to run the command:
 ```shell
 gcloud services enable container.googleapis.com
@@ -78,43 +76,28 @@ You should navigate to the folder chapter18 and execute the command:
 helm upgrade -f resources/helm-override.yaml airflow apache-airflow/airflow --namespace airflow --debug
 ```
 
-
-
 The details I followed for deployment [can be found here](https://towardsdatascience.com/deploying-airflow-on-google-kubernetes-engine-with-helm-28c3d9f7a26b).
 Note that in my case helm configured the deployment with the
 CeleryExecutor instead of the KubernetesExecutor
 as mentioned in the book.
 
-Code accompanying the GCP section of Chapter 18 in the book 'Data pipelines with Apache Airflow'.
+## Additional GCP setup details for DAG
+### Fetch ratings
+You need to manually create a bucket and assign another role to
+the user. You can pick one of these two (I suggest the first one):
+- Storage Object Admin - if you want to be able to re-run the
+DAG.
+- Storage Object Creator - if you plan to run the DAG once for
+each execution date.
 
-## Contents
+The chapter skips on creating the bucket and assigning this role.
 
-This code example contains the following files:
+### GCS to BigQuery (import in bigquery)
+You should manually create a dataset and also assign the appropriate
+role to the service account. In my case, I assigned the user the
+role:
+- BigQuery Data Editor
 
-├── Makefile            # Makefile for helping run commands.
-├── dags
-│   └── gcp.py          # The actual DAG.
-├── docker-compose.yml  # Docker-compose file for Airflow.
-├── README.md           # This file.
-└── scripts
-    └── fetch_data.py   # Helper script for fetching data.
-
-## Usage
-
-To get started with the code example, first make sure to fetch the required dataset:
-
-    make data/ratings
-
-Next, use the GCP console (or other tool of choice) to create the following resources for the DAG:
-
-* GCS bucket
-
-How to create these resources (+ what settings to used) is described in the Chapter.
-
-Once the required resources have been created, you can start Airflow to run the DAG:
-
-    make airflow-start
-
-You can tear down the Airflow resources using
-
-    make airflow-stop
+### Big query to GCS
+Make sure to create a gcs bucket for storing the results from
+BQ.
