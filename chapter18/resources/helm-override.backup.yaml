@@ -1,6 +1,6 @@
 images:
   airflow:
-    repository: europe-west4-docker.pkg.dev/lucky-ridge-346418/airflow-gke/airflow-ch18
+    repository: europe-west4-docker.pkg.dev/<your_project_id>/airflow-gke/airflow-ch18
     tag: latest
     pullPolicy: IfNotPresent
 
@@ -8,7 +8,7 @@ images:
 config:
   logging:
     remote_logging: 'True'
-    remote_base_log_folder: 'gs://airflow_logs_mac/airflow/logs/'
+    remote_base_log_folder: 'gs://<your_logs_bucket>/airflow/logs/'
     remote_log_conn_id: 'cad'
     google_key_path:  "/opt/airflow/secrets/key.json"
   webserver:
@@ -60,7 +60,7 @@ triggerer:
 dags:
   gitSync:
     enabled: true
-    repo: https://github.com/mrn-aglic/datapipelines-airflow-book.git
+    repo: https://github.com/mrn-aglic/datapipelines-airflow-book.git # or replace with your github repo
     branch: master
     subPath: "chapter18/dags"
     sshKeySecret: airflow-gke-git-secret

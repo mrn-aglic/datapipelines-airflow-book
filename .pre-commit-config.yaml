@@ -14,6 +14,7 @@ repos:
     rev: 21.5b1
     hooks:
     - id: black
+      additional_dependencies: ['click==8.0.4']
 #  - repo: https://github.com/pycqa/flake8
 #    rev: '3.9.2'
 #    hooks:
@@ -29,10 +30,6 @@ repos:
         args: ["--profile", "black"]
         # extra dependencies for config in pyproject.toml
         additional_dependencies: [ "toml" ]
-  - repo: https://github.com/ambv/black
-    rev: 20.8b1
-    hooks:
-      - id: black
   - repo: https://github.com/pre-commit/mirrors-pylint
     rev: v2.6.0
     hooks:

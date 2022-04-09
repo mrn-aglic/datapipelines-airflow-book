@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: movielens-api
+  name: movielens-api
+  namespace: airflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: movielens-api
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: movielens-api
+    spec:
+      containers:
+      - image: europe-west4-docker.pkg.dev/lucky-ridge-346418/airflow-gke/movielens-api:latest
+        name: movielens-api
+        resources: {}
+        env:
+          - name: API_USER
+            valueFrom:
+              secretKeyRef:
+                name: movielenssecret
+                key: API_USER
+          - name: API_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: movielenssecret
+                key: API_PASSWORD
+status: {}
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: movielens-api
+  labels:
+    app: movielens-api
+spec:
+  type: ClusterIP
+  selector:
+    app: movielens-api
+  ports:
+    - protocol: TCP
+      port: 5010
+      targetPort: 5010
