@@ -339,3 +339,19 @@ The logs should hopefully work now.
 
 Myself, I had to create a new project and start over as I
 probably messed up something while learning.
+
+# References
+General medium articles on deploying airflow:
+1. https://towardsdatascience.com/deploying-airflow-on-google-kubernetes-engine-with-helm-28c3d9f7a26b
+2. https://towardsdatascience.com/deploying-airflow-on-google-kubernetes-engine-with-helm-part-two-f833b0a3b0b1
+
+Keda from airflow documentation:
+1. https://airflow.apache.org/docs/helm-chart/stable/keda.html
+
+GitHub sync from airflow docs:
+1. https://airflow.apache.org/docs/helm-chart/stable/manage-dags-files.html#mounting-dags-from-a-private-github-repo-using-git-sync-sidecar
+
+Remote logging ariflow docs:
+1. https://airflow.apache.org/docs/apache-airflow-providers-google/stable/logging/gcs.html
+
+And of course - the book itself.
