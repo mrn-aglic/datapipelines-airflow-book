@@ -1,6 +1,6 @@
 # datapipelines-airflow-book
 
-Some code that i typed while following the book Data Pipelines with Apache Airflow published by Manning.
+Some code that I typed while following the book Data Pipelines with Apache Airflow published by Manning.
 
 Chapter 07 took me a great deal of time, and generally,
 I don't find it very well explained in the book.
