@@ -10,3 +10,11 @@ from the original repo might cause confusion.
 Therefore, I took the time to write a comprehensive
 README for chapter 07 in hopes that it might help
 others.
+
+For chapter 09 I kind of dockerized the testing environment.
+I also had issues with running certain postgres image versions
+from Python while reading this chapter and working through the
+examples.
+
+I expanded chapter 18 to include how to actually run DAGs on
+GCP. It also includes some references I used.
